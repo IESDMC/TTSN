@@ -1,0 +1,25 @@
+download/*
+.backup/*
+.test/*
+
+### vue3
+web/frontend/node_modules/*
+web/frontend/dist/*
+
+### django
+web/*/migrations/*
+web/*/__pycache__/*
+
+### nignx
+containers/nginx/log/*
+
+### program use
+web/app.sock
+web/static/*
+web/db.sqlite3
+# web/connect.json
+.env
+# *jpg
+# *png
+# *.gif
+# *.xcf

@@ -1,0 +1,65 @@
+version: "3"
+services:
+  nginx:
+    container_name: ttsn_nginx
+    build: ./containers/nginx
+    restart: always
+    ports:
+      - "8010:80"
+    volumes:
+      - ./web:/code
+      - ./download:/download
+      - ./containers/nginx/log:/var/log/nginx
+      - ./containers/nginx/docker_nginx.conf:/etc/nginx/sites-available/docker_nginx.conf:ro
+    networks:
+      - ttsn_net
+    depends_on:
+      - django
+    # secrets:
+    #   - source: env_file
+    #     target: .env
+    #     mode: 0644
+
+  django:
+    container_name: "ttsn_django"
+    # user: 1000:1000
+    build: .
+    init: true
+    env_file:
+      - .env
+    # secrets:
+    #   - env
+    # command: bash -c "python manage.py migrate --noinput && python manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:8000"
+    # 更新資料庫並跟nignx溝通
+    # command: bash -c "python manage.py makemigrations && python manage.py migrate --noinput && python manage.py collectstatic --noinput && uwsgi --ini  uwsgi.ini"
+    # command: bash -c "python manage.py collectstatic --noinput && uwsgi --ini  uwsgi.ini"
+    command: bash -c "python manage.py makemigrations && python manage.py migrate --noinput && uwsgi --ini  uwsgi.ini"
+    # command: bash -c "uwsgi --ini  uwsgi.ini"
+    volumes:
+      - ./web:/code
+      - ./download:/download
+      - /data:/data
+      # tag:test container
+      #測試 python manage.py runserver 0.0.0.0:8013
+      #砍掉vite佔用port fuser -k 8080/tcp
+
+      # 掛載：
+      #sudo sshfs -o allow_other root@140.109.80.59:/data /data -o reconnect
+      #dmc@IES27839910#2705
+
+      # 卸載：
+      #sudo fusermount -u /data
+
+      #sudo mount -t nfs -o soft,intr,timeo=1 140.109.82.114:/data /data
+    ports:
+      - "8011:8000"
+      - "8013:8013"
+
+networks:
+  ttsn_net:
+    external: true
+# secrets:
+#   # env:
+#   #   file: .env
+#   env_file:
+#     external: true

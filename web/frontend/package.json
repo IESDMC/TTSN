@@ -1,0 +1,48 @@
+{
+  "name": "ttsn",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host --port 8080",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "patch-package": "^6.5.0",
+    "pinia": "^2.0.17",
+    "vue": "^3.2.37",
+    "vue-i18n": "^9.3.0-beta.10",
+    "vue-router": "^4.1.3"
+  },
+  "devDependencies": {
+    "@fortawesome/fontawesome-free": "^6.4.2",
+    "@popperjs/core": "^2.11.5",
+    "@vitejs/plugin-vue": "^3.0.1",
+    "@vitejs/plugin-vue-jsx": "^2.0.0",
+    "@vue-leaflet/vue-leaflet": "^0.8.1",
+    "@vue/tsconfig": "^0.1.3",
+    "axios": "^0.27.2",
+    "bootstrap": "^5.2.0",
+    "bootstrap-vue-3": "^0.1.21",
+    "d3": "^7.8.5",
+    "gitart-vue-dialog": "^2.4.1",
+    "graphql": "^16.6.0",
+    "graphql-tag": "^2.12.6",
+    "howler": "^2.2.3",
+    "leaflet": "^1.9.3",
+    "leaflet.markercluster": "^1.5.0",
+    "multi-range-slider-vue": "^1.1.4",
+    "npm-run-all": "^4.1.5",
+    "pinia-plugin-persist": "^1.0.0",
+    "raw-loader": "^4.0.2",
+    "sass": "^1.57.1",
+    "typescript": "~4.7.4",
+    "vite": "^4.5.3",
+    "vite-svg-loader": "^3.6.0",
+    "vue-good-table-next": "^0.2.1",
+    "vue-loading-overlay": "^6.0.2",
+    "vue-recaptcha-v3": "^2.0.1",
+    "vue-tsc": "^0.39.5"
+  }
+}
