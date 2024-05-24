@@ -44,19 +44,19 @@ const getCol = (type: string) => {
           type: 'string',
         },
         {
-          label: t('latitude'),
+          label: t('latitude') + " (°)",
           field: 'lat',
           type: 'number',
           formatFn: (value: number) => `${(+value).toFixed(4)}`,
         },
         {
-          label: t('longitude'),
+          label: t('longitude') + " (°)",
           field: 'lon',
           type: 'number',
           formatFn: (value: number) => `${(+value).toFixed(4)}`,
         },
         {
-          label: t('elev'),
+          label: t('elev') + " (m)",
           field: 'elev',
           type: 'number',
         },
@@ -200,7 +200,7 @@ const selectDownload: any = () => {
   selectDownload.download = async () => {
     // console.debug("selectedRows=", table.selectedRows);
     const dataFileStore = useDataFileStore();
-    await dataFileStore.getDataFile(1, table.selectedRows);
+    await dataFileStore.getZipFile(table.selectedRows);
   };
 
   // console.debug(dialogControls)
@@ -248,9 +248,9 @@ const rowStyleClassFn = (row: any) => {
     @row-mouseleave="() => (tableTarget.hovered = undefined)" @row-click="(params: any) => tableTarget.clicked = params"
     :select-options="{
     enabled: tableTarget.selectFlag,
-    selectionInfoClass: 'custom-class',
-    selectionText: 'rows selected',
-    clearSelectionText: 'clear',
+    selectionInfoClass: 'selectionInfo',
+    selectionText: $t('rowsSelected'),
+    clearSelectionText: $t('clear'),
   }" ref="dataTable">
     <template #table-actions>
       <div class="downloadBtns">
@@ -407,5 +407,9 @@ const rowStyleClassFn = (row: any) => {
   td {
     opacity: 0.6;
   }
+}
+
+:deep(.selectionInfo) {
+  font-size: 24px;
 }
 </style>

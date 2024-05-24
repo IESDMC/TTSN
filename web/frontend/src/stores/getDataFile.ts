@@ -10,16 +10,54 @@ import { queryDataFile } from "./schema/query";
 export const useDataFileStore = defineStore("dataFileStore", () => {
   const fileData = ref<fileDataType>();
   const userDownloadList = ref<dataListType>([]);
-  //==action
-  const getDataFile = (type: number, dataList: dataListType) => {
-    // console.debug(type, dataList);
-    let fileType = ["jpg", "zip"][type];
+
+  function getYearObj(dataList) {
     let yearObj = dataList.reduce((acc: { [key: string]: string[] }, obj) => {
       const key = obj["date"].split("-")[0];
       const fileArr = acc[key] ?? [];
       fileArr.push(obj["fileName"]);
       return { ...acc, [key]: fileArr };
     }, {});
+
+    return yearObj;
+  }
+  //==action
+  const getZipFile = (dataList: dataListType) => {
+    let yearObj = getYearObj(dataList);
+    let params = { yearObj };
+    // console.debug(params);
+
+    axiosAPI
+      .post("download/", params, { responseType: "blob" })
+      .then((response) => {
+        // console.log(response);
+        // create file link in browser's memory
+        const href = URL.createObjectURL(response.data);
+        // create "a" HTML element with href to file & click
+        const link = document.createElement("a");
+        Object.assign(link, {
+          href,
+          download: `TTSN.${new Date().toISOString()}.zip`,
+        });
+        // link.href = href;
+        // link.setAttribute("download", "file.tgz"); //or any other extension
+        document.body.appendChild(link);
+        link.click();
+
+        // clean up "a" element & remove ObjectURL
+        document.body.removeChild(link);
+        URL.revokeObjectURL(href);
+
+        console.log("Download Success!");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+  const getImgFile = (type: number, dataList: dataListType) => {
+    // console.debug(type, dataList);
+    let fileType = ["jpg", "zip"][type],
+      yearObj = getYearObj(dataList);
 
     let params = { yearObj, fileType };
     // console.debug(params);
@@ -30,6 +68,7 @@ export const useDataFileStore = defineStore("dataFileStore", () => {
           variables: params,
         })
         .then((response) => {
+          // console.debug(response);
           function base64ToByteArray(base64Data) {
             let byteCharacters = atob(base64Data),
               buffer = new Array(byteCharacters.length),
@@ -94,7 +133,8 @@ export const useDataFileStore = defineStore("dataFileStore", () => {
   };
 
   return {
-    getDataFile,
+    getImgFile,
+    getZipFile,
     fileData,
     resetState,
   };

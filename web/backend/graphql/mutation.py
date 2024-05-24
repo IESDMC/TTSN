@@ -8,19 +8,25 @@ import requests
 import strawberry
 import strawberry_django
 from asgiref.sync import sync_to_async
-from backend.models import Station
+from backend.models import DownloadLog, Station
 from django.db.models import F
 from gqlauth.core.field_ import field as fieldAuth
 from gqlauth.core.types_ import GQLAuthError
 
-from .types import ResType, staIDInput
+from .decorater import ApiForIES
+from .types import ResType, downloadInput, staIDInput
 
 
 @strawberry.type
 class UpdateDB:
     @strawberry.mutation
-    def test(self) -> ResType:
-        return ResType(success=True, text=f'')
+    def add_downloadLog(self, downloadInput: downloadInput) -> ResType:
+        # print(downloadInput)
+        DownloadLog.objects.create(
+            size_bytes=downloadInput.sizeBytes,
+        )
+
+        return ResType(success=True, text=f'download log updated')
 
     @strawberry.mutation
     def add_ttsn(self, staIDInput: staIDInput) -> ResType:
@@ -51,38 +57,10 @@ class UpdateDB:
         Station.objects.get(id=id).delete()
         return ResType(success=True, text=f'')
 
-    # @strawberry.mutation
-    # def add_PGA(self, PGAInput: PGAInput) -> ResType:
-    #     date = PGAInput.date
-    #     time_ = PGAInput.time
-    #     staCode = PGAInput.staCode
-
-    #     datetime_ = datetime.datetime.combine(date, time_)
-    #     print('PGAInput', PGAInput)
-    #     # eventID = Event.objects.filter(Date__exact=date, Time__exact=time_).values_list('CWB_ID', flat=True).get()
-    #     # # print('eventID', eventID)
-    #     # # check input data
-    #     # if not eventID:
-    #     #     return ResType(success=False, text=f'event is not in DB')
-    #     pgaindb = PGA.objects.filter(event__exact=datetime_, staCode__exact=staCode)
-    #     # print('pgaindb', pgaindb)
-    #     if pgaindb:
-    #         return ResType(success=False, text=f'data in DB')
-    #     else:
-    #         PGA.objects.create(
-    #             event=datetime_,
-    #             staCode=staCode,
-    #             pga=PGAInput.pga if PGAInput.pga is not strawberry.UNSET else None,
-    #             pgv=PGAInput.pgv if PGAInput.pgv is not strawberry.UNSET else None,
-    #             az=PGAInput.az,
-    #             dist=PGAInput.dist,
-    #         )
-
-    #         return ResType(success=True, text=f'')
-
 
 @strawberry.type
 class Mutation:
-    @strawberry.mutation
-    def updateDB(self) -> UpdateDB:
+
+    @fieldAuth(directives=[ApiForIES()])
+    def auth_IES(self) -> Union[GQLAuthError, UpdateDB]:
         return UpdateDB()

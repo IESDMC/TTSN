@@ -7,7 +7,9 @@ import { useStaListStore } from "@/stores/getStaList";
 import { LCircleMarker, LPopup } from "@vue-leaflet/vue-leaflet";
 import * as d3 from "d3";
 import { computed, onMounted, reactive, ref, watch, type PropType } from "vue";
+import { useI18n } from 'vue-i18n';
 
+const { t, locale } = useI18n({ inheritLocale: true });
 const staListStore = useStaListStore();
 const staList = computed(() => staListStore.staList);
 const userStaList = ref();//==使用者挑的測站列表
@@ -102,7 +104,7 @@ onMounted(() => {
             if (criteria.station) {
                 const rowsPerPage = 10;
 
-                let list = Object.keys(staList.value);
+                let list = staList.value.map(d => d.station);
                 let filterObj = list.reduce(
                     (obj, cur) => ({ ...obj, [cur]: true }), {});
                 Object.assign(criteria.station.checkList, { ...filterObj });
@@ -168,38 +170,49 @@ onMounted(() => {
 
         emits("getMapController", mapController);
 
-        watch(() => criteria.dataVal, (filter) => {
+        //==設定要監聽的屬性，避免不用來篩選的屬性觸發
+        const criteriaFilters = [criteria.dataVal, criteria.station.checkList,];
+        watch(criteriaFilters, (filterArr) => {
             if (!userDataList.value) return;
-            // console.debug(filter, staEveList);
+
             let action = () => {
-                const dataValKeys = Object.keys(filter);
+                let filter = {
+                    dataVal: filterArr[0],
+                    staList: filterArr[1],
+                };
+                const dataValKeys = Object.keys(filter.dataVal);
 
                 let dataFilters = dataValKeys.map(key =>
                     getIsInRangeFun(key === 'date' ?
-                        filter.date.current.map(d => new Date(d).getTime()) :
-                        filter[key].current)
+                        filter.dataVal.date.current.map(d => new Date(d).getTime()) :
+                        filter.dataVal[key].current)
+                );
+                let stationFilter = (key: string) => filter.staList[key];
+
+                //==先篩date來得到data列表
+                let tmpData = dataList.value.filter((d) => dataFilters.every((fun, i) =>
+                    fun(dataValKeys[i] === 'date' ?
+                        new Date(d.date).getTime() :
+                        d[dataValKeys[i]]))
+                );
+                userDataList.value = tmpData.filter((d: dataType) =>
+                    stationFilter(d.station)
                 );
 
-                userDataList.value = dataList.value.filter((d: dataType) =>
-                    dataFilters.every((fun, i) =>
-                        fun(dataValKeys[i] === 'date' ?
-                            new Date(d.date).getTime() :
-                            d[dataValKeys[i]])
-                    ));
-
-                let newStaList = [... new Set(userDataList.value.map(d => d.station))] as string[];
+                let newStaList = [... new Set(tmpData.map(d => d.station))] as string[];
                 userStaList.value = staList.value.filter(d => newStaList.includes(d.station));
+                // console.debug(newStaList);
+
                 //==根據選擇的paper來決定station篩選要顯示的checkBox
-                // let paperStaArr = [... new Set(tmpData.map(d => d.Station))] as string[];
-                // let showList = paperStaArr.reduce((obj, cur) => ({ ...obj, [cur]: true }), {});
-                // let totalPage = Math.ceil(paperStaArr.length / criteria.station.page.rowsPerPage)
-                // // console.debug(paperStaArr);
-                // criteria.station.showList = showList;
-                // Object.assign(criteria.station.page, {
-                //     currPage: criteria.station.page.totalPage === totalPage ?
-                //         criteria.station.page.currPage : 1,
-                //     totalPage
-                // });
+                let showList = newStaList.reduce((obj, cur) => ({ ...obj, [cur]: true }), {});
+                let totalPage = Math.ceil(newStaList.length / criteria.station.page.rowsPerPage)
+
+                criteria.station.showList = showList;
+                Object.assign(criteria.station.page, {
+                    currPage: criteria.station.page.totalPage === totalPage ?
+                        criteria.station.page.currPage : 1,
+                    totalPage
+                });
             };
             updateHandler(action, updateObj);
             tableTarget.selectFlag = false;
@@ -310,15 +323,19 @@ onMounted(() => {
 <template>
     <mapUI :mapController="mapController">
         <template #mapLayers>
-            <div v-for="(staObj, index) in  userStaList " :key="index">
+            <div v-for="(staObj, index) in   userStaList  " :key="index">
                 <LCircleMarker :lat-lng="[staObj.lat, staObj.lon]" :color="display.marker['markerColor']" :opacity="1"
                     :weight="1" :radius="display.marker['markerSize']" :fill="true"
                     :fillOpacity="display.marker['markerOpacity']" :fillColor="display.marker['markerColor']"
                     :name="staObj.station" ref="markers">
                     <LPopup>
                         <h3>{{ `${staObj.station} ` }}</h3>
-                        {{ `${$t("latitude")}: ${staObj.lat}°` }}<br />
-                        {{ `${$t("longitude")}: ${staObj.lon}°` }}<br />
+                        {{ `${$t("stationName")} : ${staObj[locale === "en" ? 'nameEnglish' : 'nameChinese']}` }}<br />
+                        {{ `${$t("latitude")} : ${staObj.lat}°` }}<br />
+                        {{ `${$t("longitude")} : ${staObj.lon}°` }}<br />
+                        {{ `${$t("elev")} : ${staObj.elev} m` }}<br />
+                        {{ `${$t("gain")} : ${staObj.gain} ` }}<br />
+
                     </LPopup>
                 </LCircleMarker>
             </div>

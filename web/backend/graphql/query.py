@@ -39,8 +39,6 @@ class resolver:
         # ex: yearObj = {'1972':['file1','file2'...]}
         # print(fileType, yearObj)
         dataRootDir = "/data/TTSN/"
-        downloadDir = "/download/"
-
         res = []
 
         if fileType.value == 0:
@@ -68,47 +66,6 @@ class resolver:
                             data=data,
                         )
                     )
-
-        elif fileType.value == 1:
-            # 拼出find指令產生檔案列表:
-            # (find ~/TEST -maxdepth 1 \( -name "ex*" -o -name "catalog2TECDB2*" \) -print; find ~/QSIS -maxdepth 1 \( -name "rfi*" -o -name "client_parameters*" \) -print) | zip -j ~/TEST/output.zip -@
-            def getHash(length):
-                seed = 'qwertyuiopasdfghjklmnbvcxz0123456789QWERTYUIOPASDFGHJKLMNBVCXZ'
-                seedLen = len(seed)
-
-                hash = ''
-                for index in range(length):
-                    hash += seed[randrange(seedLen)]
-                return (hash)
-
-            findCMD = "(find"
-            try:
-                yearArr = yearObj.keys()
-                for yearIdx, year in enumerate(yearArr):
-                    findCMD += f' {dataRootDir+year} -maxdepth 1 \('
-                    for fileIdx, fileName in enumerate(yearObj[year]):
-                        if fileIdx > 0:
-                            findCMD += ' -o'
-                        findCMD += f' -name "{fileName}"'
-                findCMD += f' \) -print{")" if yearIdx == len(yearArr)-1 else ";"}'
-            except:
-                pass
-
-            zipName = f'{getHash(15)}.zip'
-            CMD = f'{findCMD} | zip -j {downloadDir+zipName} -@'
-            print(CMD)
-            _, _ = getstatusoutput(CMD)
-
-            with open(downloadDir+zipName, 'rb') as f:
-                data = f.read()
-                # encodedData = base64.b64encode(data)
-
-            res.append(
-                dataFileType(
-                    name=zipName,
-                    data=data,
-                )
-            )
 
         return res
 

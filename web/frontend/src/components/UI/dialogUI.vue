@@ -40,7 +40,7 @@ onMounted(() => {
           fileName: data.fileName,
         };
 
-        await dataFileStore.getDataFile(0, [data]);
+        await dataFileStore.getImgFile(0, [data]);
         break;
       // default:
       //   let typeIdx = {

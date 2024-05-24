@@ -24,7 +24,7 @@ class dataType:
     component: str
     date: datetime.date
 
-# contour圖片,stalist...等等檔案
+# 圖片檔案
 
 
 @ strawberry.type
@@ -39,6 +39,11 @@ class ResType:
     text: str
 
 # input type
+
+
+@strawberry.django.input(models.DownloadLog, partial=True)
+class downloadInput:
+    sizeBytes: int
 
 
 @strawberry.input

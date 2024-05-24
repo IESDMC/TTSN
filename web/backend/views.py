@@ -16,102 +16,77 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.generic import View
 
-eventDataPath = "/data/eventData/"
+dataRootDir = "/data/TTSN/"
 downloadDir = "/download/"
 # dev:port
-graphqlUrl = f'http://{settings.GQL_SERVER}/graphql/'
-queryAddLog = """mutation MyMutation($sizeBytes: Int, $email: String , $affiliation: String, $station: String , $event: String ) {
-        authIes {
-            ... on UpdateDB {
-            __typename
-            addDownloadlog(
-                downloadInput: {affiliation: $affiliation, email: $email, sizeBytes: $sizeBytes, station:$station, event:$event}
-            ) {
-                success
-                text
-            }
-            }
-        }
-        }"""
-
-
-def generatedRandom(number):
-    seed = 'qwertyuiopasdfghjklmnbvcxz0123456789QWERTYUIOPASDFGHJKLMNBVCXZ'
-    stop = len(seed)
-    goal = ''
-    for index in range(number):
-        goal += seed[randrange(stop)]
-
-    return (goal)
+graphqlUrl = f'http://{settings.GQL_SERVER}:8010/graphql/'
+queryAddLog = """
+mutation MyMutation($sizeBytes: Int) {
+  authIes {
+    ... on GQLAuthError {
+      message
+      code
+    }
+    ... on UpdateDB {
+      __typename
+      addDownloadlog(downloadInput: {sizeBytes: $sizeBytes}) {
+        success
+        text
+      }
+    }
+  }
+}
+"""
 
 
 class download(View):
-    def getFile(self, event, station, userLog):
-        tmp = generatedRandom(15)
-        fileRandomName = ''
-        rename = ''
-        filetype = 'tgz' if len(station) == 0 else 'zip'
+    def getFile(self, yearObj, userLog):
+        # 拼出find指令產生檔案列表:
+        # (find ~/TEST -maxdepth 1 \( -name "ex*" -o -name "catalog2TECDB2*" \) -print; find ~/QSIS -maxdepth 1 \( -name "rfi*" -o -name "client_parameters*" \) -print) | zip -j ~/TEST/output.zip -@
+        def getHash(length):
+            seed = 'qwertyuiopasdfghjklmnbvcxz0123456789QWERTYUIOPASDFGHJKLMNBVCXZ'
+            seedLen = len(seed)
 
-        if filetype == 'tgz':
-            yyyy = event[0][:4]
-            datetime_ = datetime.fromisoformat(event[0]).strftime('%Y%m%d%H%M%S')
-            dir = f'{eventDataPath}{yyyy}/{datetime_}/'
-            fileName = f'{datetime_}'
-            fileRandomName = f'{fileName}.{tmp}.tar.gz'
-            rename = f'{fileName}.tar.gz'
-            _, _ = getstatusoutput(f'cp {dir+rename} {downloadDir+fileRandomName}')
+            hash = ''
+            for index in range(length):
+                hash += seed[randrange(seedLen)]
+            return (hash)
 
-        elif filetype == 'zip':
-            # 拼出find指令產生檔案列表(ex:find /data/eventData/2023/20230112051553/SAC -type f -name "W139.*" )
-            findCMD = "find"
-            try:
-                for eve in event:
-                    yyyy = eve[:4]
-                    datetime_ = datetime.fromisoformat(eve).strftime('%Y%m%d%H%M%S')
-                    # print(datetime_)
-                    dir = f'{eventDataPath}{yyyy}/{datetime_}/SAC'
-                    findCMD += f' {dir}'
-                findCMD += " -type f"
+        findCMD = "(find"
+        try:
+            yearArr = yearObj.keys()
+            for yearIdx, year in enumerate(yearArr):
+                findCMD += f' {dataRootDir+year} -maxdepth 1 \('
+                for fileIdx, fileName in enumerate(yearObj[year]):
+                    if fileIdx > 0:
+                        findCMD += ' -o'
+                    findCMD += f' -name "{fileName}"'
+            findCMD += f' \) -print{")" if yearIdx == len(yearArr)-1 else ";"}'
+        except:
+            pass
 
-                for idx, sta in enumerate(station):
-                    if idx > 0:
-                        findCMD += ' -o '
-                    findCMD += f' -name "{sta}.*"'
-            except:
-                pass
+        zipName = f'{getHash(15)}.zip'
+        CMD = f'{findCMD} | zip -j {downloadDir+zipName} -@'
+        print(CMD)
+        _, _ = getstatusoutput(CMD)
 
-            fileName = station[0] if len(event) > len(station) else event[0]
-            fileRandomName = f'{fileName}.{tmp}.zip'
-            rename = f'{fileName}.zip'
-            CMD = f'{findCMD} | zip -j {downloadDir+fileRandomName} -@'
-            # print(CMD)
-            _, _ = getstatusoutput(CMD)
-            # print(a, b)
+        # insert download log to DB
         variables = {
-            "email": userLog.get('email'),
-            "affiliation": userLog.get('affiliation'),
-            "sizeBytes":  os.path.getsize(downloadDir+fileRandomName),
-            "event": ','.join(event),
-            "station": ','.join(station)
+            "sizeBytes":  os.path.getsize(downloadDir+zipName),
         }
-        # subprocess.Popen
-        print(variables)
         r = requests.post(graphqlUrl, json={'query': queryAddLog, "variables": variables})
-        # print(r.json())
-
-        return fileRandomName, rename, filetype
+        # print('downloadLog_result = ', variables, dir(r))
+        return zipName
 
     def post(self, request):
         # print(self,request)
         req = json.loads(request.body)
-        # print(req)
-        station = req.get('station')
-        event = req.get('event')
+        yearObj = req.get('yearObj')
         userLog = req.get('userLog')
-        # print(station, event, userLog)
+        print(yearObj, userLog)
 
-        ori_filename, basename, filetype = self.getFile(event, station, userLog)
-        url = f'/get_file/{ori_filename}?renameto={basename}&filetype={filetype}'
+        zipName = self.getFile(yearObj, userLog)
+        url = f'/get_file/{zipName}?renameto={'TTSN.'+zipName}&filetype=zip'
         # print(url)
         response = HttpResponse()
         response['content_type'] = 'application/octet-stream'

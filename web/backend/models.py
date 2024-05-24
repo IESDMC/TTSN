@@ -43,6 +43,19 @@ class Data(models.Model):
         managed = False
         db_table = 'TTSN_Data'
 
+
+class DownloadLog(models.Model):
+    id = models.AutoField(primary_key=True, auto_created=True, editable=False)
+    size_bytes = models.IntegerField(default=0)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    # def __str__(self):
+    #     return self.downloadSize
+
+    class Meta:
+        managed = True
+        db_table = 'TTSN_DownloadLog'
+
 ############### admin ################
 
 

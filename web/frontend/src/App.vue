@@ -24,7 +24,10 @@ const VueLoaderStore = useVueLoaderStore();
   <!-- Nav Start -->
   <nav class="navbar navbar-expand-lg py-lg-0 px-lg-5 border-bottom shadow-sm fadeIn" data-wow-delay="0.1s">
     <a class="navbar-brand ms-4 ms-lg-0">
-      <h3 class="mb-0 text-dark fw-bold">TTSN</h3>
+      <h3 class="mb-0 text-dark fw-bold">
+        TTSN<small> - paper seismogram scec data center</small>
+      </h3>
+      <p>Taiwan Telemetered Seismographic Network</p>
     </a>
     <button type="button" class="navbar-toggler me-4" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
       <span class="navbar-toggler-icon"></span>

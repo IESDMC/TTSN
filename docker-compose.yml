@@ -41,6 +41,8 @@ services:
       - /data:/data
       # tag:test container
       #測試 python manage.py runserver 0.0.0.0:8013
+      #下載檔案要在nigx的port上測試(8010)
+
       #砍掉vite佔用port fuser -k 8080/tcp
 
       # 掛載：
