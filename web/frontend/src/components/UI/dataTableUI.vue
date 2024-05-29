@@ -190,17 +190,45 @@ const selectDownload: any = () => {
 
   tableTarget.selectFlag = !tableTarget.selectFlag;
 
-  table.filteredRows.forEach((headerRow) => {
-    headerRow.children.forEach((row) => {
-      row["vgtSelected"] = tableTarget.selectFlag;
+  // 自動全選
+  let autoSelectAll = new Promise(r => {
+    table.filteredRows.forEach((headerRow, i1) => {
+      headerRow.children.forEach((row, i2) => {
+        row["vgtSelected"] = tableTarget.selectFlag;
+        if (i1 === table.filteredRows.length - 1 && i2 === headerRow.children.length - 1)
+          r(true);
+      });
     });
+
   });
   table.emitSelectedRows();
 
-  selectDownload.download = async () => {
-    // console.debug("selectedRows=", table.selectedRows);
+  const maxSelection = 50;
+  selectDownload.download = () => {
+    const overLimitFlag = table.selectedRows.length > maxSelection;
+    if (overLimitFlag) return;
     const dataFileStore = useDataFileStore();
-    await dataFileStore.getZipFile(table.selectedRows);
+    dataFileStore.getZipFile(table.selectedRows);
+  };
+  // 檢查選擇數量
+  selectDownload.checkAmount = async () => {
+    await autoSelectAll;
+    // console.debug("selectedRows=", table.selectedRows.length);
+
+    const overLimitFlag = table.selectedRows.length > maxSelection;
+    let triggerWarning = () => {
+      let selectInfo = table.$el.querySelector('.selectionInfo');
+      let warning = selectInfo.querySelector('.selectWarning');
+      if (!warning) {
+        warning = document.createElement('div');
+        warning.classList.add('selectWarning');
+        warning.innerText = t("selectWarning");
+        warning.style.display = "none";
+        selectInfo.prepend(warning);
+      }
+      warning.style.display = overLimitFlag ? "block" : "none";
+    };
+    triggerWarning();
   };
 
   // console.debug(dialogControls)
@@ -246,7 +274,7 @@ const rowStyleClassFn = (row: any) => {
     // infoFn: (params) => `my own page ${params.firstRecordOnPage}`,
   }" :search-options="{ enabled: true }" @row-mouseenter="(params: any) => tableTarget.hovered = params"
     @row-mouseleave="() => (tableTarget.hovered = undefined)" @row-click="(params: any) => tableTarget.clicked = params"
-    :select-options="{
+    @selected-rows-change="selectDownload.checkAmount()" :select-options="{
     enabled: tableTarget.selectFlag,
     selectionInfoClass: 'selectionInfo',
     selectionText: $t('rowsSelected'),
@@ -411,5 +439,10 @@ const rowStyleClassFn = (row: any) => {
 
 :deep(.selectionInfo) {
   font-size: 24px;
+
+  .selectWarning {
+    color: rgb(197, 25, 25);
+    font-weight: 700;
+  }
 }
 </style>

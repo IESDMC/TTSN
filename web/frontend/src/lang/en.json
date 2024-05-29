@@ -58,6 +58,7 @@
   "dataDownload": "Download image data",
   "rowsSelected": "rows selected",
   "clear": "clear",
+  "selectWarning": "Please make your selection below 50",
   "getInTouch": "GET IN TOUCH",
   "getInTouch_location": "7005 RCEC Building, 128 Academia Road, Section 2, Nankang, Taipei 11529, Taiwan",
   "getInTouch_tel": "+886-2-2783-9910ext.2705",
