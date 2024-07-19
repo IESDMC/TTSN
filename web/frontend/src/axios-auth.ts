@@ -2,7 +2,9 @@ import { useVueLoaderStore } from "@/stores/vueLoader";
 import axios from "axios";
 
 // const ttsnAPI = "http://140.109.80.93:8013/";
-const ttsnAPI = "http://140.109.80.93:8010/";
+// const ttsnAPI = "http://140.109.80.93:8010/";
+const ttsnAPI = "http://140.109.80.59:8000/";
+
 const instance = axios.create({
   baseURL: ttsnAPI,
   // headers: {

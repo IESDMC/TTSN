@@ -2,7 +2,7 @@ import datetime
 from typing import List, Optional
 
 import strawberry
-from backend import models
+from __backend import models
 from strawberry.scalars import JSON, Base16, Base32, Base64
 
 

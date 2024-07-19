@@ -37,7 +37,7 @@ const mapController: mapControllerType = {
     icons:
         reactive({
             criteria: {
-                flag: false,
+                flag: isDataView,
                 popup: isDataView ?
                     {
                         dataVal: { date: [], },
@@ -215,7 +215,7 @@ onMounted(() => {
                 });
             };
             updateHandler(action, updateObj);
-            tableTarget.selectFlag = false;
+            // tableTarget.selectFlag = false;
         }, { deep: true });
 
         //==更新dataTable

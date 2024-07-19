@@ -157,7 +157,6 @@ watch(locale, () => {
   tableData.columns = getCol(tableTarget.type);
 });
 
-
 const downloadCSV = () => {
   const columns = tableData.columns.map(col => col.field),
     rows = tableData.rows;
@@ -185,52 +184,47 @@ const downloadCSV = () => {
   link.click();
   link.remove();
 };
-const selectDownload: any = () => {
-  let table = dataTable.value;
+const downloadData = {
+  maxSelection: 50,
+  overLimitFlag: () => dataTable.value && (dataTable.value.selectedRows.length > downloadData.maxSelection),
+  //for disable download
+  disableButton: () => dataTable.value && (!dataTable.value.selectedRows.length || downloadData.overLimitFlag()),
+  download: () => {
+    let table = dataTable.value;
+    console.debug("table=", table);
 
-  tableTarget.selectFlag = !tableTarget.selectFlag;
-
-  // 自動全選
-  let autoSelectAll = new Promise(r => {
-    table.filteredRows.forEach((headerRow, i1) => {
-      headerRow.children.forEach((row, i2) => {
-        row["vgtSelected"] = tableTarget.selectFlag;
-        if (i1 === table.filteredRows.length - 1 && i2 === headerRow.children.length - 1)
-          r(true);
-      });
-    });
-
-  });
-  table.emitSelectedRows();
-
-  const maxSelection = 50;
-  selectDownload.download = () => {
-    const overLimitFlag = table.selectedRows.length > maxSelection;
+    let overLimitFlag = downloadData.overLimitFlag();
     if (overLimitFlag) return;
     const dataFileStore = useDataFileStore();
     dataFileStore.getZipFile(table.selectedRows);
-  };
+  },
   // 檢查選擇數量
-  selectDownload.checkAmount = async () => {
-    await autoSelectAll;
+  checkAmount: () => {
+    // await autoSelectAll;
+    let selectInfo = dataTable.value.$el.querySelector('.selectionInfo');
+    // console.debug("table=", table);
     // console.debug("selectedRows=", table.selectedRows.length);
 
-    const overLimitFlag = table.selectedRows.length > maxSelection;
-    let triggerWarning = () => {
-      let selectInfo = table.$el.querySelector('.selectionInfo');
+    let showSelectedRows = () => {
+      let rowCount = dataTable.value.selectedRows.length;
+      selectInfo.querySelector('.selectedRowCount').innerText = t("rowsSelected", { val: rowCount });
+    }
+    let triggerWarning = (flag) => {
       let warning = selectInfo.querySelector('.selectWarning');
-      if (!warning) {
-        warning = document.createElement('div');
-        warning.classList.add('selectWarning');
-        warning.innerText = t("selectWarning");
-        warning.style.display = "none";
-        selectInfo.prepend(warning);
-      }
-      warning.style.display = overLimitFlag ? "block" : "none";
+      warning.style.display = flag ? "block" : "none";
     };
-    triggerWarning();
-  };
-
+    showSelectedRows();
+    triggerWarning(downloadData.overLimitFlag());
+  },
+  selectAll: (flag) => {
+    let table = dataTable.value;
+    table.filteredRows.forEach((headerRow, i) => {
+      headerRow.children.forEach((row, j) => {
+        row["vgtSelected"] = flag;
+      });
+    });
+    table.emitSelectedRows();
+  }
   // console.debug(dialogControls)
   // Object.assign(dialogControls.content, {
   //   type: 'downloadForm',
@@ -252,6 +246,7 @@ const rowStyleClassFn = (row: any) => {
   };
   return classList;
 };
+
 </script>
 
 <template>
@@ -274,22 +269,37 @@ const rowStyleClassFn = (row: any) => {
     // infoFn: (params) => `my own page ${params.firstRecordOnPage}`,
   }" :search-options="{ enabled: true }" @row-mouseenter="(params: any) => tableTarget.hovered = params"
     @row-mouseleave="() => (tableTarget.hovered = undefined)" @row-click="(params: any) => tableTarget.clicked = params"
-    @selected-rows-change="selectDownload.checkAmount()" :select-options="{
-    enabled: tableTarget.selectFlag,
-    selectionInfoClass: 'selectionInfo',
-    selectionText: $t('rowsSelected'),
-    clearSelectionText: $t('clear'),
+    @selected-rows-change="downloadData.checkAmount" :select-options="{
+    enabled: tableTarget?.action === 'download',
+    disableSelectInfo: true,
+    // selectionInfoClass: 'selectionInfo',
+    // selectionText: $t('rowsSelected'),
+    // clearSelectionText: $t('clear'),
   }" ref="dataTable">
     <template #table-actions>
-      <div class="downloadBtns">
-        <button type="button" :title="$t('downloadCSV')" class="btn btn-secondary me-2" @click="downloadCSV()"
-          :disabled="!tableData.rows.length">
-          {{ $t("downloadCSV") }}
-        </button>
-        <button v-if="tableTarget?.action === 'download'" type="button" :title="$t('selectDownload')"
-          class="btn btn-secondary" @click="selectDownload()" :disabled="!tableData.rows.length">
-          {{ $t("selectDownload") }}
-        </button>
+      <div class="d-flex flex-column">
+        <div class="d-flex flex-row-reverse">
+          <div class="downloadBtns">
+            <button type="button" :title="$t('downloadCSV')" class="btn btn-secondary me-2" @click="downloadCSV()"
+              :disabled="!tableData.rows.length">
+              {{ $t("downloadCSV") }}
+            </button>
+            <button v-if="tableTarget?.action === 'download'" type="button" :title="$t('downloadData')"
+              class="btn btn-secondary me-2" @click="downloadData.download()"
+              :disabled="!tableData.rows.length || downloadData.disableButton()">
+              {{ $t("downloadData") }}
+            </button>
+          </div>
+        </div>
+        <div v-if="tableTarget?.action === 'download'" class="selectionInfo d-flex flex-nowrap">
+          <div class="selectedRowCount me-3">{{ $t("rowsSelected", { val: 0 }) }}</div>
+          <div v-show="false" class="selectWarning">{{ $t("selectWarning") }}</div>
+          <div class="position-absolute end-0">
+            <button class="btn btn-secondary me-2" @click="downloadData.selectAll(true)">{{ $t("selectAll") }}</button>
+            <button class="btn btn-secondary me-2" @click="downloadData.selectAll(false)">{{ $t("unselectAll")
+              }}</button>
+          </div>
+        </div>
       </div>
     </template>
     <template #table-actions-bottom>
@@ -305,8 +315,6 @@ const rowStyleClassFn = (row: any) => {
             </li>
           </ol>
         </div>
-
-
       </div>
 
       <!-- tableTotal -->
@@ -314,13 +322,8 @@ const rowStyleClassFn = (row: any) => {
         <label class="total_label">{{
     `${$t("tableTotal")} : ${tableData.rows.length +
     (!isNaN(others?.tableAllStaTotal) ? (' / ' + others?.tableAllStaTotal) : '')} `
-  }}</label>
+          }}</label>
       </div>
-    </template>
-    <template #selected-row-actions>
-      <button type="button" :title="$t('dataDownload')" class="btn btn-secondary" @click="selectDownload.download()">
-        {{ $t("dataDownload") }}
-      </button>
     </template>
   </VueGoodTable>
 </template>
@@ -367,15 +370,22 @@ const rowStyleClassFn = (row: any) => {
 // 搜尋列
 :deep(.vgt-global-search) {
   padding: 10px 0;
+  padding-bottom: 0;
 
   .vgt-global-search__input {
     width: 250px;
     flex-grow: unset;
+    position: absolute;
+  }
+
+  .vgt-global-search__actions {
+    width: 100%;
+    margin-left: 0px;
   }
 
   .downloadBtns {
-    position: absolute;
-    right: 10px;
+    // position: absolute;
+    // right: 10px;
   }
 }
 
@@ -439,6 +449,12 @@ const rowStyleClassFn = (row: any) => {
 
 :deep(.selectionInfo) {
   font-size: 24px;
+  background: #fdf9e8;
+  padding: 5px 16px;
+  border-top: 1px solid #DCDFE6;
+  color: #d3aa3b;
+  font-weight: 700;
+  margin-top: 10px;
 
   .selectWarning {
     color: rgb(197, 25, 25);

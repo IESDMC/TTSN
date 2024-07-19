@@ -9,7 +9,7 @@ import { RouterView } from 'vue-router';
 //==i18n
 const { locale } = useI18n();
 const lang = ['tw', 'en'];
-let langIdx = 1;
+let langIdx = 0;
 const handleChangeLanguage = (e) => {
   langIdx = +!langIdx;
   locale.value = lang[langIdx];
@@ -25,9 +25,9 @@ const VueLoaderStore = useVueLoaderStore();
   <nav class="navbar navbar-expand-lg py-lg-0 px-lg-5 border-bottom shadow-sm fadeIn" data-wow-delay="0.1s">
     <a class="navbar-brand ms-4 ms-lg-0">
       <h3 class="mb-0 text-dark fw-bold">
-        TTSN<small> - paper seismogram scec data center</small>
+        {{ $t('site_name') }} - <small>{{ $t('site_title1') }}</small>
       </h3>
-      <p>Taiwan Telemetered Seismographic Network</p>
+      <h5 class="text-dark fw-bold">{{ $t('site_title2') }}</h5>
     </a>
     <button type="button" class="navbar-toggler me-4" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
       <span class="navbar-toggler-icon"></span>
@@ -98,6 +98,10 @@ body {
     margin-left: 8px;
   }
 
+  span.nav-link {
+    cursor: default !important;
+  }
+
   .navbar-nav .nav-link {
     margin-right: 30px;
     padding: 20px 0;
@@ -108,6 +112,7 @@ body {
     text-transform: uppercase;
     outline: none;
     white-space: nowrap;
+    cursor: pointer;
 
     .active,
     &:hover {

@@ -8,7 +8,7 @@ import requests
 import strawberry
 import strawberry_django
 from asgiref.sync import sync_to_async
-from backend.models import DownloadLog, Station
+from __backend.models import DownloadLog, Station
 from django.db.models import F
 from gqlauth.core.field_ import field as fieldAuth
 from gqlauth.core.types_ import GQLAuthError

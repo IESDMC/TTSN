@@ -16,8 +16,8 @@ export const useDataListStore = defineStore("dataList", () => {
         query: print(queryData),
       })
       .then((response) => {
-        console.debug(response.data.data.dataList);
-        let tmp: dataListType = response.data.data.dataList;
+        console.debug(response.data.data.TTSN.dataList);
+        let tmp: dataListType = response.data.data.TTSN.dataList;
         dataList.value = tmp;
       })
       .catch((err) => {

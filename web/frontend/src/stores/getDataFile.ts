@@ -37,7 +37,7 @@ export const useDataFileStore = defineStore("dataFileStore", () => {
         const link = document.createElement("a");
         Object.assign(link, {
           href,
-          download: `TTSN.${new Date().toISOString()}.zip`,
+          download: `TTSN.${new Date().toISOString()}.tar`,
         });
         // link.href = href;
         // link.setAttribute("download", "file.tgz"); //or any other extension
@@ -79,7 +79,7 @@ export const useDataFileStore = defineStore("dataFileStore", () => {
             // console.debug(byteNumbers, byteArray);
             return byteArray;
           }
-          let tmp = response.data.data.dataFile[0];
+          let tmp = response.data.data.TTSN.dataFile[0];
           let base64Data = tmp.data;
           // console.debug(tmp);
 

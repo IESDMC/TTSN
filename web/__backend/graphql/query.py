@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional
 
 import strawberry
 import strawberry_django
-from backend.models import Data, Station
+from __backend.models import Data, Station
 from PIL import Image
 from strawberry.scalars import JSON
 from strawberry.types import Info

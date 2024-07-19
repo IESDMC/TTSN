@@ -16,7 +16,7 @@ export const useStaListStore = defineStore("stationList", () => {
         query: print(queryStations),
       })
       .then((response) => {
-        console.debug(response.data.data.stationList);
+        console.debug(response.data.data.TTSN.stationList);
         let tmp: Array<{
           stationCode: string;
           nameChinese: string;
@@ -25,7 +25,7 @@ export const useStaListStore = defineStore("stationList", () => {
           gain: number;
           lat: number;
           lon: number;
-        }> = response.data.data.stationList;
+        }> = response.data.data.TTSN.stationList;
 
         let list: stationListType = tmp.map((obj) => {
           let nObj = Object.assign(obj, {

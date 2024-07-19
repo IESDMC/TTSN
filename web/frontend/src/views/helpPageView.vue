@@ -40,14 +40,14 @@ function scrollToElement(elementId) {
 };
 </script>
 
-<template >
+<template>
   <div class="container">
     <div class="contents d-flex flex-column w-50">
-      <a href="javascript:void(0);" @click="scrollToElement('resultPage_help')">
-        {{ $t('resultPage') }}
+      <a href="javascript:void(0);" @click="scrollToElement('stationPage_help')">
+        {{ $t('stationPage') }}
       </a>
-      <a href="javascript:void(0);" @click="scrollToElement('modelPage_help')">
-        {{ $t('modelPage') }}
+      <a href="javascript:void(0);" @click="scrollToElement('dataPage_help')">
+        {{ $t('dataPage') }}
       </a>
 
       <!-- <a href="#resultPage_help" class="">{{ $t('resultPage_help') }}</a>
@@ -59,21 +59,25 @@ function scrollToElement(elementId) {
       <p class="h4 my-4">{{ $t('introduction_help') }}</p>
     </div>
 
-    <div class="border-bottom my-4" id="resultPage_help">
-      <h1 class="fw-bold">{{ $t('resultPage') }}</h1>
-      <p class="h4 my-4" v-html="fixImgSrc($t('resultPage_help1'))"></p>
+    <div class="border-bottom my-4" id="stationPage_help">
+      <h1 class="fw-bold">{{ $t('stationPage') }}</h1>
+      <p class="h4 my-4" v-html="fixImgSrc($t('stationPage_help1'))"></p>
       <div class="d-flex flex-column align-items-center">
         <img class="helpIMG" :src="getImage(`pic/helpIMG1.png`)" />
-        <span class="">{{ $t('resultPage_helpIMG1') }}</span>
+        <span class="">{{ $t('stationPage_helpIMG1') }}</span>
       </div>
     </div>
 
-    <div class="border-bottom my-4" id="modelPage_help">
-      <h1 class="fw-bold">{{ $t('modelPage') }}</h1>
-      <p class="h4 my-4" v-html="fixImgSrc($t('modelPage_help1'))"></p>
-      <div class="d-flex flex-column align-items-center">
+    <div class="border-bottom my-4" id="dataPage_help">
+      <h1 class="fw-bold">{{ $t('dataPage') }}</h1>
+      <p class="h4 my-4" v-html="fixImgSrc($t('dataPage_help1'))"></p>
+      <div class="d-flex flex-column align-items-center my-4">
         <img class="helpIMG" :src="getImage(`pic/helpIMG2.png`)" />
-        <span class="">{{ $t('modelPage_helpIMG1') }}</span>
+        <span class="">{{ $t('dataPage_helpIMG1') }}</span>
+      </div>
+      <div class="d-flex flex-column align-items-center">
+        <img class="helpIMG" :src="getImage(`pic/helpIMG3.png`)" />
+        <span class="">{{ $t('dataPage_helpIMG2') }}</span>
       </div>
     </div>
   </div>
@@ -126,5 +130,4 @@ function scrollToElement(elementId) {
 //   margin-top: -50px;
 //   padding-top: 50px;
 //   /* 避免跳轉後元素被遮擋 */
-// }
-</style>
+// }</style>

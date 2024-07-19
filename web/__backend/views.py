@@ -65,8 +65,10 @@ class download(View):
         except:
             pass
 
-        zipName = f'{getHash(15)}.zip'
-        CMD = f'{findCMD} | zip -j {downloadDir+zipName} -@'
+        # zipName = f'{getHash(15)}.zip'
+        # CMD = f'{findCMD} | zip -j {downloadDir+zipName} -@'
+        zipName = f'{getHash(15)}.tar'
+        CMD = f'{findCMD} | tar --transform "s|.*/||" -cvf {downloadDir+zipName} -T -'
         print(CMD)
         _, _ = getstatusoutput(CMD)
 
@@ -86,7 +88,7 @@ class download(View):
         print(yearObj, userLog)
 
         zipName = self.getFile(yearObj, userLog)
-        url = f'/get_file/{zipName}?renameto={'TTSN.'+zipName}&filetype=zip'
+        url = f'/get_file/{zipName}?renameto=TTSN.{zipName}&filetype=tar'
         # print(url)
         response = HttpResponse()
         response['content_type'] = 'application/octet-stream'

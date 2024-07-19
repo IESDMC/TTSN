@@ -24,7 +24,7 @@ const UIControls: UIControlsType = {
     clicked: undefined,
     type: "data",
     action: 'download',
-    selectFlag: false,//用於選擇列表
+    // selectFlag: true,//用於選擇列表
   }),
   dialogUI: reactive({
     openState: false,
