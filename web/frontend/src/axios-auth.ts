@@ -1,8 +1,7 @@
 import { useVueLoaderStore } from "@/stores/vueLoader";
 import axios from "axios";
 
-// const ttsnAPI = "http://140.109.80.93:8013/";
-// const ttsnAPI = "http://140.109.80.93:8010/";
+// const ttsnAPI = "http://140.109.80.59:8013/";
 const ttsnAPI = "http://140.109.80.59:8000/";
 
 const instance = axios.create({
@@ -18,7 +17,8 @@ const VueLoaderStore = useVueLoaderStore();
 instance.interceptors.request.use(
   (req) => {
     // Do something before request is sent
-    // console.debug(req.data);
+    // console.debug(req);
+    VueLoaderStore.addXHR(req);
     VueLoaderStore.setActive(true);
     // const JWT = store.getters.getJWT
     // JWT && (x.headers.Authorization = 'JWT ' + JWT)
@@ -36,8 +36,8 @@ instance.interceptors.response.use(
   function (response) {
     // Any status code that lie within the range of 2xx cause this function to trigger
     // Do something with response data
+    VueLoaderStore.addXHR(response, false);
     VueLoaderStore.setActive(false);
-    // console.debug(response);
     return response;
   },
   function (error) {

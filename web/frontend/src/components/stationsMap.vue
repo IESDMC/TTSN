@@ -159,6 +159,7 @@ onMounted(() => {
         let unwatch_init = watch([dataList, staList], (listArr) => {
             let dataList = listArr[0],
                 staList = listArr[1];
+            // console.debug(staList, dataList);
             if (dataList && staList) {
                 userStaList.value = staList;
                 userDataList.value = dataList;

@@ -15,7 +15,6 @@ const changeDataList = (list: any[]) => {
 };
 const getMapController = (c: any[]) => {
   mapController.value = c;
-
 };
 
 const UIControls: UIControlsType = {

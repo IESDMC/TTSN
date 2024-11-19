@@ -16,7 +16,7 @@ export const useStaListStore = defineStore("stationList", () => {
         query: print(queryStations),
       })
       .then((response) => {
-        console.debug(response.data.data.TTSN.stationList);
+        // console.log("TTSN.stationList=", response.data.data.TTSN.stationList);
         let tmp: Array<{
           stationCode: string;
           nameChinese: string;

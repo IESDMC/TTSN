@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { staInfoType, UIControlsType } from "@/components/statics/types";
 import { useDataFileStore } from "@/stores/getDataFile";
+import { useVueLoaderStore } from "@/stores/vueLoader";
 import { reactive, ref, watch, type PropType } from "vue";
 import { VueGoodTable } from 'vue-good-table-next';
 import "vue-good-table-next/dist/vue-good-table-next.css";
@@ -8,6 +9,7 @@ import { useI18n } from 'vue-i18n';
 
 const dataTable = ref(null);
 const { t, locale } = useI18n({ inheritLocale: true });
+const VueLoaderStore = useVueLoaderStore();
 
 const props = defineProps({
   UIControls: {
@@ -147,8 +149,9 @@ watch(() => tableTarget.type, (type) => {
 
 }, { immediate: true });
 watch(() => props.dataList, (list) => {
-  // console.debug('list', list);
+  // console.debug('props.dataList', list);
   if (!list) return;
+  // VueLoaderStore.setActive(true);
   tableData.rows = list;
 });
 
